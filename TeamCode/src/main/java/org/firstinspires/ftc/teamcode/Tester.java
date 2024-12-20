@@ -48,6 +48,9 @@ public class Tester extends OpMode {
         // STICK VALUES
         leftStickX = gamepad1.left_stick_x; // Right (+), Left (-)
         leftStickY = -gamepad1.left_stick_y*reverseControl; // Up (+), Down (-)
+        // EXPONENTIAL ACCELERATION
+        leftStickX = (float) Math.pow(leftStickX, 3); // Cubic scaling for smooth acceleration
+        leftStickY = (float) Math.pow(leftStickY, 3); // Cubic scaling for smooth acceleration
         // MOVEMENT CONTROL
         telemetry.addData("System Info", String.valueOf(leftStickX)+" "+String.valueOf(leftStickY));
         telemetry.addData("Reloader:", String.valueOf(toggleTimer.seconds()));
