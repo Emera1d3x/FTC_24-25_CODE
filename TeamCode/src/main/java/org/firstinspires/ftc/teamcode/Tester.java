@@ -18,8 +18,11 @@ public class Tester extends OpMode {
     float leftStickY;
     // REVERSE CONTROL VARS
     int reverseControl = 1;
-    boolean reverseControlCanToggle = true;
     ElapsedTime toggleTimer = new ElapsedTime();
+    // SERVO GRABBER VARS
+    boolean in = false;
+    boolean out = false;
+    ElapsedTime grabTimer = new ElapsedTime();
     int curPosition = 0;
 
     public void initializeStuff(){
@@ -30,6 +33,7 @@ public class Tester extends OpMode {
         motorRBWheel = hardwareMap.get(DcMotor.class, "motorRB"); // Pin #?
         servoWheel = hardwareMap.get(CRServo.class, "servoWheel"); // Pin #0
         toggleTimer.reset();
+        grabTimer.reset();
     }
 
     @Override
@@ -50,19 +54,14 @@ public class Tester extends OpMode {
         leftStickY = -gamepad1.left_stick_y*reverseControl; // Up (+), Down (-)
         // EXPONENTIAL ACCELERATION
         // MOVEMENT CONTROL
-        telemetry.addData("System Info", String.valueOf(leftStickX)+" "+String.valueOf(leftStickY));
-        telemetry.addData("Reloader:", String.valueOf(toggleTimer.seconds()));
-        telemetry.addData("Can Press:", String.valueOf(reverseControlCanToggle));
         if (leftStickX<=0){
             motorRBWheel.setPower(leftStickY+Math.abs(leftStickX));
             motorLBWheel.setPower(-leftStickY);
-            if (toggleTimer.seconds() > 5) {reverseControlCanToggle = true;}
-            if (gamepad1.y && reverseControlCanToggle){reverseControl*=-1;reverseControlCanToggle=false;toggleTimer.reset();}
+            if (gamepad1.y && toggleTimer.seconds() > 4){reverseControl*=-1;toggleTimer.reset();}
         } else if (leftStickX>0){
             motorRBWheel.setPower(leftStickY);
             motorLBWheel.setPower(-leftStickY-leftStickX);
-            if (toggleTimer.seconds() > 5) {reverseControlCanToggle = true;}
-            if (gamepad1.y && reverseControlCanToggle){reverseControl*=-1;reverseControlCanToggle=false;toggleTimer.reset();}
+            if (gamepad1.y && toggleTimer.seconds() > 4){reverseControl*=-1;toggleTimer.reset();}
         } else if (gamepad1.dpad_up){
             motorRBWheel.setPower(0.07);
             motorLBWheel.setPower(-0.07);
@@ -75,6 +74,7 @@ public class Tester extends OpMode {
             motorLBWheel.setPower(-0.07);
         }
         // ARM CONTROL
+        telemetry.addData("Arm Position:", String.valueOf(motorArm.getCurrentPosition()) + curPosition);
         if (gamepad1.right_trigger>0){
             motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorArm.setPower(1);
@@ -95,9 +95,12 @@ public class Tester extends OpMode {
             motorArm.setTargetPosition(curPosition);
             motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
-        telemetry.addData("Temu:", String.valueOf(motorArm.getCurrentPosition()) + curPosition);
         // CLAW CONTROL
-        if (gamepad1.a){servoWheel.setPower(0.6);}
-        if (gamepad1.b){servoWheel.setPower(-0.6);}
+        if (in){servoWheel.setPower(0.6);} else if (out){servoWheel.setPower(-0.6);}
+        if (gamepad1.a && grabTimer.milliseconds() > 500){
+            in = true; out = false; grabTimer.reset();
+        } else if (gamepad1.b && grabTimer.milliseconds() > 500){
+            in = false; out = true; grabTimer.reset();
+        }
     }
 }
