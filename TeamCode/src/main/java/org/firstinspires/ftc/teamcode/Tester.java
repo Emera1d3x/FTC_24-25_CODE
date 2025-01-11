@@ -44,7 +44,6 @@ public class Tester extends OpMode {
     }
     @Override
     public void loop() {
-        // STATS
         telemetry.addData("Arm Position:", String.valueOf(motorArm.getCurrentPosition()) + curPosition);
         telemetry.addData("DPAD", gamepad1.toString());
         String thing = in+" "+out;
@@ -68,15 +67,15 @@ public class Tester extends OpMode {
             if (gamepad1.y && toggleTimer.seconds() > 4){reverseControl*=-1;toggleTimer.reset();}
         }
         if (gamepad1.dpad_up){
-            motorRBWheel.setPower(0.17);
-            motorLBWheel.setPower(-0.17);
+            motorRBWheel.setPower(0.17*reverseControl);
+            motorLBWheel.setPower(-0.17*reverseControl);
         } else if (gamepad1.dpad_down){
-            motorRBWheel.setPower(-0.17);
-            motorLBWheel.setPower(0.17);
+            motorRBWheel.setPower(-0.17*reverseControl);
+            motorLBWheel.setPower(0.17*reverseControl);
         } else if (gamepad1.dpad_right){
-            motorLBWheel.setPower(-0.17);
+            motorLBWheel.setPower(-0.17*reverseControl);
         } else if (gamepad1.dpad_left){
-            motorRBWheel.setPower(0.17);
+            motorRBWheel.setPower(0.17*reverseControl);
         }
         // ARM CONTROL
         if (gamepad1.right_trigger>0){
