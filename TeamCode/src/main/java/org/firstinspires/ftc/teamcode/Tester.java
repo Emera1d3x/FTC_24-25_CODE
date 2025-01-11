@@ -44,11 +44,15 @@ public class Tester extends OpMode {
     }
     @Override
     public void loop() {
+        // STATS
+        telemetry.addData("Arm Position:", String.valueOf(motorArm.getCurrentPosition()) + curPosition);
+        telemetry.addData("DPAD", gamepad1.toString());
+        String thing = in+" "+out;
+        telemetry.addData("IN OUT:", thing);
         // DEFAULTS
         motorArm.setPower(0);
         motorLBWheel.setPower(0.0);
         motorRBWheel.setPower(0.0);
-        servoWheel.setPower(0.0);
         // STICK VALUES
         leftStickX = gamepad1.left_stick_x; // Right (+), Left (-)
         leftStickY = -gamepad1.left_stick_y*reverseControl; // Up (+), Down (-)
@@ -62,19 +66,19 @@ public class Tester extends OpMode {
             motorRBWheel.setPower(leftStickY);
             motorLBWheel.setPower(-leftStickY-leftStickX);
             if (gamepad1.y && toggleTimer.seconds() > 4){reverseControl*=-1;toggleTimer.reset();}
-        } else if (gamepad1.dpad_up){
-            motorRBWheel.setPower(0.07);
-            motorLBWheel.setPower(-0.07);
+        }
+        if (gamepad1.dpad_up){
+            motorRBWheel.setPower(0.17);
+            motorLBWheel.setPower(-0.17);
         } else if (gamepad1.dpad_down){
-            motorRBWheel.setPower(-0.07);
-            motorLBWheel.setPower(0.07);
+            motorRBWheel.setPower(-0.17);
+            motorLBWheel.setPower(0.17);
         } else if (gamepad1.dpad_right){
-            motorRBWheel.setPower(0.07);
+            motorLBWheel.setPower(-0.17);
         } else if (gamepad1.dpad_left){
-            motorLBWheel.setPower(-0.07);
+            motorRBWheel.setPower(0.17);
         }
         // ARM CONTROL
-        telemetry.addData("Arm Position:", String.valueOf(motorArm.getCurrentPosition()) + curPosition);
         if (gamepad1.right_trigger>0){
             motorArm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motorArm.setPower(1);
@@ -96,11 +100,13 @@ public class Tester extends OpMode {
             motorArm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         }
         // CLAW CONTROL
-        if (in){servoWheel.setPower(0.6);} else if (out){servoWheel.setPower(-0.6);}
-        if (gamepad1.a && grabTimer.milliseconds() > 500){
-            in = true; out = false; grabTimer.reset();
-        } else if (gamepad1.b && grabTimer.milliseconds() > 500){
-            in = false; out = true; grabTimer.reset();
+        if (in){servoWheel.setPower(0.2);} else if (out){servoWheel.setPower(-0.2);}
+        if (gamepad1.b && grabTimer.milliseconds() > 200){
+            if (in){in = false; out = false; grabTimer.reset();servoWheel.setPower(0);}
+            else {in = true; out = false; grabTimer.reset();}
+        } else if (gamepad1.a && grabTimer.milliseconds() > 200){
+            if (out){in = false; out = false; grabTimer.reset();servoWheel.setPower(0);}
+            else {in = false; out = true; grabTimer.reset();}
         }
     }
 }
